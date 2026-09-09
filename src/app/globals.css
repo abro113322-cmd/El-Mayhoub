@@ -1,26 +1,398 @@
 @import "tailwindcss";
 
+/* =========================================
+   THEME VARIABLES
+   ========================================= */
+
 :root {
-  --background: #ffffff;
+  --background: #f8fafc;
   --foreground: #171717;
+
+  --surface: #ffffff;
+  --surface-secondary: #f1f5f9;
+
+  --border: #e2e8f0;
+  --border-secondary: #cbd5e1;
+
+  --text-primary: #0f172a;
+  --text-secondary: #334155;
+  --text-muted: #64748b;
+
+  --sidebar: #ffffff;
+  --topbar: #ffffff;
+
+  --input: #f1f5f9;
+
+  --accent: #2563eb;
+  --accent-hover: #1d4ed8;
+
+  --success: #22c55e;
+  --danger: #ef4444;
+  --info: #06b6d4;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* =========================================
+   DARK THEME
+   ========================================= */
+
+html:not(.light) {
+  --background: #050816;
+  --foreground: #ededed;
+
+  --surface: #0f172a;
+  --surface-secondary: #1e293b;
+
+  --border: #1e293b;
+  --border-secondary: #334155;
+
+  --text-primary: #ffffff;
+  --text-secondary: #cbd5e1;
+  --text-muted: #94a3b8;
+
+  --sidebar: #0f172a;
+  --topbar: #050816;
+
+  --input: #1e293b;
+
+  --accent: #2563eb;
+  --accent-hover: #1d4ed8;
+}
+
+/* =========================================
+   LIGHT THEME
+   ========================================= */
+
+html.light {
+  --background: #f8fafc;
+  --foreground: #171717;
+
+  --surface: #ffffff;
+  --surface-secondary: #f1f5f9;
+
+  --border: #e2e8f0;
+  --border-secondary: #cbd5e1;
+
+  --text-primary: #0f172a;
+  --text-secondary: #334155;
+  --text-muted: #64748b;
+
+  --sidebar: #ffffff;
+  --topbar: #ffffff;
+
+  --input: #f1f5f9;
+
+  --accent: #2563eb;
+  --accent-hover: #1d4ed8;
+}
+
+/* =========================================
+   BODY
+   ========================================= */
+
+html,
+body {
+  min-height: 100%;
+  margin: 0;
+  padding: 0;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+
+  transition:
+    background-color 0.25s ease,
+    color 0.25s ease;
+}
+
+/* =========================================
+   THEME BACKGROUNDS
+   ========================================= */
+
+.bg-slate-900 {
+  background-color: var(--surface) !important;
+}
+
+.bg-slate-800 {
+  background-color: var(--surface-secondary) !important;
+}
+
+.bg-\[\#050816\] {
+  background-color: var(--background) !important;
+}
+
+.bg-\[\#05091d\] {
+  background-color: var(--background) !important;
+}
+
+.bg-\[\#141c32\] {
+  background-color: var(--surface) !important;
+}
+
+.bg-\[\#24304a\] {
+  background-color: var(--input) !important;
+}
+
+/* =========================================
+   TEXT COLORS
+   ========================================= */
+
+.text-white {
+  color: var(--text-primary) !important;
+}
+
+.text-slate-300 {
+  color: var(--text-secondary) !important;
+}
+
+.text-slate-400 {
+  color: var(--text-muted) !important;
+}
+
+.text-slate-500 {
+  color: var(--text-muted) !important;
+}
+
+/* =========================================
+   BORDERS
+   ========================================= */
+
+.border-slate-800 {
+  border-color: var(--border) !important;
+}
+
+.border-slate-700 {
+  border-color: var(--border-secondary) !important;
+}
+
+.border-slate-600 {
+  border-color: var(--border-secondary) !important;
+}
+
+/* =========================================
+   SIDEBAR / TOPBAR
+   ========================================= */
+
+aside {
+  background-color: var(--sidebar);
+  color: var(--text-primary);
+  border-color: var(--border);
+}
+
+header {
+  background-color: var(--topbar);
+  color: var(--text-primary);
+  border-color: var(--border);
+}
+
+/* =========================================
+   INPUTS / SELECTS / TEXTAREAS
+   ========================================= */
+
+input,
+select,
+textarea {
+  background-color: var(--input);
+  color: var(--text-primary);
+
+  border-color: var(--border-secondary);
+
+  transition:
+    background-color 0.25s ease,
+    color 0.25s ease,
+    border-color 0.25s ease;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--text-muted);
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+}
+
+/* =========================================
+   BUTTONS
+   ========================================= */
+
+.bg-blue-600 {
+  background-color: var(--accent) !important;
+}
+
+.hover\:bg-blue-700:hover {
+  background-color: var(--accent-hover) !important;
+}
+
+.bg-blue-500\/10 {
+  background-color: rgba(37, 99, 235, 0.1) !important;
+}
+
+.bg-red-500\/10 {
+  background-color: rgba(239, 68, 68, 0.1) !important;
+}
+
+.bg-green-500\/10 {
+  background-color: rgba(34, 197, 94, 0.1) !important;
+}
+
+/* =========================================
+   HOVER STATES
+   ========================================= */
+
+.hover\:bg-slate-800:hover {
+  background-color: var(--surface-secondary) !important;
+}
+
+.hover\:bg-slate-700:hover {
+  background-color: var(--border-secondary) !important;
+}
+
+/* =========================================
+   TABLES
+   ========================================= */
+
+thead.bg-slate-800 {
+  background-color: var(--surface-secondary) !important;
+}
+
+tr {
+  border-color: var(--border);
+}
+
+tr:hover {
+  background-color: color-mix(
+    in srgb,
+    var(--surface-secondary) 65%,
+    transparent
+  );
+}
+
+/* =========================================
+   GENERAL TRANSITIONS
+   ========================================= */
+
+body,
+aside,
+header,
+main,
+div,
+section,
+article,
+table,
+thead,
+tbody,
+tr,
+input,
+select,
+textarea,
+button {
+  transition:
+    background-color 0.25s ease,
+    color 0.25s ease,
+    border-color 0.25s ease;
+}
+
+/* =========================================
+   LIGHT THEME OVERRIDES
+   ========================================= */
+
+html.light .text-white {
+  color: var(--text-primary) !important;
+}
+
+html.light .text-slate-300 {
+  color: var(--text-secondary) !important;
+}
+
+html.light .text-slate-400 {
+  color: var(--text-muted) !important;
+}
+
+html.light .bg-slate-900 {
+  background-color: var(--surface) !important;
+}
+
+html.light .bg-slate-800 {
+  background-color: var(--surface-secondary) !important;
+}
+
+html.light .border-slate-800 {
+  border-color: var(--border) !important;
+}
+
+html.light .border-slate-700 {
+  border-color: var(--border-secondary) !important;
+}
+
+/* Keep active navigation readable */
+html.light .bg-blue-600 {
+  background-color: var(--accent) !important;
+  color: #ffffff !important;
+}
+
+/* =========================================
+   DARK THEME OVERRIDES
+   ========================================= */
+
+html:not(.light) .text-white {
+  color: var(--text-primary) !important;
+}
+
+html:not(.light) .text-slate-300 {
+  color: var(--text-secondary) !important;
+}
+
+html:not(.light) .text-slate-400 {
+  color: var(--text-muted) !important;
+}
+
+html:not(.light) .bg-slate-900 {
+  background-color: var(--surface) !important;
+}
+
+html:not(.light) .bg-slate-800 {
+  background-color: var(--surface-secondary) !important;
+}
+
+html:not(.light) .border-slate-800 {
+  border-color: var(--border) !important;
+}
+
+html:not(.light) .border-slate-700 {
+  border-color: var(--border-secondary) !important;
+}
+
+/* =========================================
+   SCROLLBAR
+   ========================================= */
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-secondary) transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: var(--border-secondary);
+  border-radius: 999px;
 }
