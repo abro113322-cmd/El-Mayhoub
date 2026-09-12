@@ -13,11 +13,19 @@ type RateLimitResult = {
 };
 
 // Production requires a distributed Redis-compatible REST provider (for example
-// Upstash). Configure RATE_LIMIT_REDIS_REST_URL and
-// RATE_LIMIT_REDIS_REST_TOKEN in the server environment; never expose either
-// value through NEXT_PUBLIC_* variables.
-const endpoint = process.env.RATE_LIMIT_REDIS_REST_URL;
-const token = process.env.RATE_LIMIT_REDIS_REST_TOKEN;
+// Upstash). Prefer the explicit rate-limit configuration, then use the names
+// provisioned by the Vercel/Upstash integration. These values remain server-only.
+const configuredEndpoint = process.env.RATE_LIMIT_REDIS_REST_URL;
+const configuredToken = process.env.RATE_LIMIT_REDIS_REST_TOKEN;
+const integrationEndpoint = process.env.KV_REST_API_URL;
+const integrationToken = process.env.KV_REST_API_TOKEN;
+const hasConfiguredRateLimitProvider = Boolean(
+  configuredEndpoint && configuredToken
+);
+const endpoint = hasConfiguredRateLimitProvider
+  ? configuredEndpoint
+  : integrationEndpoint;
+const token = hasConfiguredRateLimitProvider ? configuredToken : integrationToken;
 
 function isConfigured() {
   return Boolean(endpoint && token);
@@ -28,7 +36,7 @@ export async function checkRateLimit(
 ): Promise<RateLimitResult> {
   if (!isConfigured()) {
     throw new Error(
-      "Distributed rate limiting is not configured. Set RATE_LIMIT_REDIS_REST_URL and RATE_LIMIT_REDIS_REST_TOKEN."
+      "Distributed rate limiting is not configured. Set RATE_LIMIT_REDIS_REST_URL and RATE_LIMIT_REDIS_REST_TOKEN, or KV_REST_API_URL and KV_REST_API_TOKEN."
     );
   }
 
