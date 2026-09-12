@@ -12,6 +12,15 @@ import {
 } from "@/lib/financial-security";
 
 type TransactionRow = Record<string, unknown>;
+const noStoreHeaders = { "Cache-Control": "no-store" };
+
+function jsonNoStore(body: unknown, init?: ResponseInit) {
+  return NextResponse.json(body, {
+    ...init,
+    headers: { ...init?.headers, ...noStoreHeaders },
+  });
+}
+
 const UUID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
@@ -34,21 +43,21 @@ function rpcErrorResponse(error: { code?: string; message?: string }) {
   const message = error.message ?? "";
 
   if (code === "IDEMPOTENCY_CONFLICT" || message.includes("IDEMPOTENCY_CONFLICT")) {
-    return NextResponse.json({ error: "This idempotency key was already used for a different request.", code: "IDEMPOTENCY_CONFLICT" }, { status: 409 });
+    return jsonNoStore({ error: "This idempotency key was already used for a different request.", code: "IDEMPOTENCY_CONFLICT" }, { status: 409 });
   }
   if (code === "AUTH_REQUIRED" || message.includes("AUTH_REQUIRED")) {
-    return NextResponse.json({ error: "Authentication is required.", code: "AUTH_REQUIRED" }, { status: 401 });
+    return jsonNoStore({ error: "Authentication is required.", code: "AUTH_REQUIRED" }, { status: 401 });
   }
   if (code === "FORBIDDEN" || message.includes("FORBIDDEN")) {
-    return NextResponse.json({ error: "You are not authorized for this resource.", code: "FORBIDDEN" }, { status: 403 });
+    return jsonNoStore({ error: "You are not authorized for this resource.", code: "FORBIDDEN" }, { status: 403 });
   }
   if (code === "NOT_FOUND" || message.includes("NOT_FOUND")) {
-    return NextResponse.json({ error: "Transaction was not found.", code: "NOT_FOUND" }, { status: 404 });
+    return jsonNoStore({ error: "Transaction was not found.", code: "NOT_FOUND" }, { status: 404 });
   }
   if (code === "VALIDATION_ERROR" || message.includes("VALIDATION_ERROR")) {
-    return NextResponse.json({ error: "The transaction data is invalid.", code: "VALIDATION_ERROR" }, { status: 400 });
+    return jsonNoStore({ error: "The transaction data is invalid.", code: "VALIDATION_ERROR" }, { status: 400 });
   }
-  return NextResponse.json({ error: "Transaction mutation failed.", code: "MUTATION_FAILED" }, { status: 500 });
+  return jsonNoStore({ error: "Transaction mutation failed.", code: "MUTATION_FAILED" }, { status: 500 });
 }
 
 async function authenticate() {
@@ -59,7 +68,7 @@ async function authenticate() {
   } = await supabase.auth.getUser();
 
   if (error || !user) {
-    return { supabase, response: NextResponse.json({ error: "Authentication is required.", code: "AUTH_REQUIRED" }, { status: 401 }) };
+    return { supabase, response: jsonNoStore({ error: "Authentication is required.", code: "AUTH_REQUIRED" }, { status: 401 }) };
   }
   return { supabase, user, response: null };
 }
@@ -67,7 +76,7 @@ async function authenticate() {
 function getIdempotencyKey(request: Request) {
   const key = request.headers.get("Idempotency-Key");
   if (typeof key !== "string" || !validateIdempotencyKey(key)) {
-    return NextResponse.json({ error: "A valid Idempotency-Key header is required.", code: "VALIDATION_ERROR" }, { status: 400 });
+    return jsonNoStore({ error: "A valid Idempotency-Key header is required.", code: "VALIDATION_ERROR" }, { status: 400 });
   }
   return key.trim();
 }
@@ -141,7 +150,7 @@ export async function POST(request: Request) {
 
   const parsed = await readFinancialJsonBody(request);
   if (parsed.tooLarge) {
-    return NextResponse.json(
+    return jsonNoStore(
       { error: "Request body is too large.", code: "REQUEST_TOO_LARGE" },
       { status: 413 }
     );
@@ -163,7 +172,7 @@ export async function POST(request: Request) {
     ? validateCreateBody(rawBody)
     : null;
   if (!body) {
-    return NextResponse.json({ error: "The transaction data is invalid.", code: "VALIDATION_ERROR" }, { status: 400 });
+    return jsonNoStore({ error: "The transaction data is invalid.", code: "VALIDATION_ERROR" }, { status: 400 });
   }
 
   const { data, error } = await auth.supabase.rpc("api_create_transaction", {
@@ -182,7 +191,7 @@ export async function POST(request: Request) {
   });
 
   if (error) return rpcErrorResponse(error);
-  return NextResponse.json({ success: true, transaction: unwrap(data as TransactionRow | TransactionRow[] | null) }, { status: 201 });
+  return jsonNoStore({ success: true, transaction: unwrap(data as TransactionRow | TransactionRow[] | null) }, { status: 201 });
 }
 
 export async function PATCH(request: Request) {
@@ -203,7 +212,7 @@ export async function PATCH(request: Request) {
 
   const parsed = await readFinancialJsonBody(request);
   if (parsed.tooLarge) {
-    return NextResponse.json(
+    return jsonNoStore(
       { error: "Request body is too large.", code: "REQUEST_TOO_LARGE" },
       { status: 413 }
     );
@@ -248,7 +257,7 @@ export async function PATCH(request: Request) {
       "notes",
     ])
   ) {
-    return NextResponse.json({ error: "The transaction data is invalid.", code: "VALIDATION_ERROR" }, { status: 400 });
+    return jsonNoStore({ error: "The transaction data is invalid.", code: "VALIDATION_ERROR" }, { status: 400 });
   }
 
   const body = {
@@ -275,7 +284,7 @@ export async function PATCH(request: Request) {
   });
 
   if (error) return rpcErrorResponse(error);
-  return NextResponse.json({ success: true, transaction: unwrap(data as TransactionRow | TransactionRow[] | null) });
+  return jsonNoStore({ success: true, transaction: unwrap(data as TransactionRow | TransactionRow[] | null) });
 }
 
 export async function DELETE(request: Request) {
@@ -296,7 +305,7 @@ export async function DELETE(request: Request) {
 
   const parsed = await readFinancialJsonBody(request);
   if (parsed.tooLarge) {
-    return NextResponse.json(
+    return jsonNoStore(
       { error: "Request body is too large.", code: "REQUEST_TOO_LARGE" },
       { status: 413 }
     );
@@ -305,7 +314,7 @@ export async function DELETE(request: Request) {
   const body = parsed.body;
   const id = body?.id;
   if (!isValidUuid(id) || !hasOnlyFields(body, ["id"])) {
-    return NextResponse.json({ error: "A valid transaction ID is required.", code: "VALIDATION_ERROR" }, { status: 400 });
+    return jsonNoStore({ error: "A valid transaction ID is required.", code: "VALIDATION_ERROR" }, { status: 400 });
   }
 
   const { data, error } = await auth.supabase.rpc("api_delete_transaction", {
@@ -315,5 +324,5 @@ export async function DELETE(request: Request) {
   });
 
   if (error) return rpcErrorResponse(error);
-  return NextResponse.json({ success: true, transaction: unwrap(data as TransactionRow | TransactionRow[] | null) });
+  return jsonNoStore({ success: true, transaction: unwrap(data as TransactionRow | TransactionRow[] | null) });
 }

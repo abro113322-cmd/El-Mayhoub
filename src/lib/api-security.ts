@@ -9,7 +9,7 @@ import {
 const MAX_BODY_BYTES = 8 * 1024;
 
 export const privateHeaders = {
-  "Cache-Control": "private, no-store",
+  "Cache-Control": "no-store",
 };
 
 export function apiError(status: number, message: string) {

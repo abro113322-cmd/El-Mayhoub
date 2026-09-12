@@ -21,6 +21,15 @@ type SavingRow = {
   created_at: string;
 };
 
+const noStoreHeaders = { "Cache-Control": "no-store" };
+
+function jsonNoStore(body: unknown, init?: ResponseInit) {
+  return NextResponse.json(body, {
+    ...init,
+    headers: { ...init?.headers, ...noStoreHeaders },
+  });
+}
+
 const UUID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
@@ -41,29 +50,29 @@ function rpcErrorResponse(error: { code?: string; message?: string }) {
   const message = error.message ?? "";
 
   if (code === "IDEMPOTENCY_CONFLICT" || message.includes("IDEMPOTENCY_CONFLICT")) {
-    return NextResponse.json(
+    return jsonNoStore(
       { error: "This idempotency key was already used for a different request.", code: "IDEMPOTENCY_CONFLICT" },
       { status: 409 }
     );
   }
 
   if (code === "AUTH_REQUIRED" || message.includes("AUTH_REQUIRED")) {
-    return NextResponse.json({ error: "Authentication is required.", code: "AUTH_REQUIRED" }, { status: 401 });
+    return jsonNoStore({ error: "Authentication is required.", code: "AUTH_REQUIRED" }, { status: 401 });
   }
 
   if (code === "FORBIDDEN" || message.includes("FORBIDDEN")) {
-    return NextResponse.json({ error: "You are not authorized for this resource.", code: "FORBIDDEN" }, { status: 403 });
+    return jsonNoStore({ error: "You are not authorized for this resource.", code: "FORBIDDEN" }, { status: 403 });
   }
 
   if (code === "NOT_FOUND" || message.includes("NOT_FOUND")) {
-    return NextResponse.json({ error: "Saving goal was not found.", code: "NOT_FOUND" }, { status: 404 });
+    return jsonNoStore({ error: "Saving goal was not found.", code: "NOT_FOUND" }, { status: 404 });
   }
 
   if (code === "VALIDATION_ERROR" || message.includes("VALIDATION_ERROR")) {
-    return NextResponse.json({ error: "The saving goal data is invalid.", code: "VALIDATION_ERROR" }, { status: 400 });
+    return jsonNoStore({ error: "The saving goal data is invalid.", code: "VALIDATION_ERROR" }, { status: 400 });
   }
 
-  return NextResponse.json({ error: "Saving goal mutation failed.", code: "MUTATION_FAILED" }, { status: 500 });
+  return jsonNoStore({ error: "Saving goal mutation failed.", code: "MUTATION_FAILED" }, { status: 500 });
 }
 
 async function authenticate() {
@@ -74,7 +83,7 @@ async function authenticate() {
   } = await supabase.auth.getUser();
 
   if (error || !user) {
-    return { supabase, response: NextResponse.json({ error: "Authentication is required.", code: "AUTH_REQUIRED" }, { status: 401 }) };
+    return { supabase, response: jsonNoStore({ error: "Authentication is required.", code: "AUTH_REQUIRED" }, { status: 401 }) };
   }
 
   return { supabase, user, response: null };
@@ -84,7 +93,7 @@ function getIdempotencyKey(request: Request) {
   const key = request.headers.get("Idempotency-Key");
 
   if (typeof key !== "string" || !validateIdempotencyKey(key)) {
-    return NextResponse.json(
+    return jsonNoStore(
       { error: "A valid Idempotency-Key header is required.", code: "VALIDATION_ERROR" },
       { status: 400 }
     );
@@ -123,7 +132,7 @@ export async function POST(request: Request) {
 
   const parsed = await readFinancialJsonBody(request);
   if (parsed.tooLarge) {
-    return NextResponse.json(
+    return jsonNoStore(
       { error: "Request body is too large.", code: "REQUEST_TOO_LARGE" },
       { status: 413 }
     );
@@ -159,7 +168,7 @@ export async function POST(request: Request) {
       "deadline",
     ])
   ) {
-    return NextResponse.json({ error: "The saving goal data is invalid.", code: "VALIDATION_ERROR" }, { status: 400 });
+    return jsonNoStore({ error: "The saving goal data is invalid.", code: "VALIDATION_ERROR" }, { status: 400 });
   }
 
   const requestData = {
@@ -181,7 +190,7 @@ export async function POST(request: Request) {
 
   if (error) return rpcErrorResponse(error);
 
-  return NextResponse.json({ success: true, saving: unwrap(data as SavingRow | SavingRow[] | null) }, { status: 201 });
+  return jsonNoStore({ success: true, saving: unwrap(data as SavingRow | SavingRow[] | null) }, { status: 201 });
 }
 
 export async function PATCH(request: Request) {
@@ -202,7 +211,7 @@ export async function PATCH(request: Request) {
 
   const parsed = await readFinancialJsonBody(request);
   if (parsed.tooLarge) {
-    return NextResponse.json(
+    return jsonNoStore(
       { error: "Request body is too large.", code: "REQUEST_TOO_LARGE" },
       { status: 413 }
     );
@@ -226,7 +235,7 @@ export async function PATCH(request: Request) {
     Object.prototype.hasOwnProperty.call(body ?? {}, "current_amount") ||
     !hasOnlyFields(body, ["id", "name", "target_amount", "deadline"])
   ) {
-    return NextResponse.json({ error: "The saving goal data is invalid.", code: "VALIDATION_ERROR" }, { status: 400 });
+    return jsonNoStore({ error: "The saving goal data is invalid.", code: "VALIDATION_ERROR" }, { status: 400 });
   }
 
   const requestData = {
@@ -246,7 +255,7 @@ export async function PATCH(request: Request) {
 
   if (error) return rpcErrorResponse(error);
 
-  return NextResponse.json({ success: true, saving: unwrap(data as SavingRow | SavingRow[] | null) });
+  return jsonNoStore({ success: true, saving: unwrap(data as SavingRow | SavingRow[] | null) });
 }
 
 export async function DELETE(request: Request) {
@@ -267,7 +276,7 @@ export async function DELETE(request: Request) {
 
   const parsed = await readFinancialJsonBody(request);
   if (parsed.tooLarge) {
-    return NextResponse.json(
+    return jsonNoStore(
       { error: "Request body is too large.", code: "REQUEST_TOO_LARGE" },
       { status: 413 }
     );
@@ -277,7 +286,7 @@ export async function DELETE(request: Request) {
   const id = body?.id;
 
   if (!isValidUuid(id) || !hasOnlyFields(body, ["id"])) {
-    return NextResponse.json({ error: "A valid saving goal ID is required.", code: "VALIDATION_ERROR" }, { status: 400 });
+    return jsonNoStore({ error: "A valid saving goal ID is required.", code: "VALIDATION_ERROR" }, { status: 400 });
   }
 
   const requestData = { id };
@@ -289,5 +298,5 @@ export async function DELETE(request: Request) {
 
   if (error) return rpcErrorResponse(error);
 
-  return NextResponse.json({ success: true, saving: unwrap(data as SavingRow | SavingRow[] | null) });
+  return jsonNoStore({ success: true, saving: unwrap(data as SavingRow | SavingRow[] | null) });
 }
