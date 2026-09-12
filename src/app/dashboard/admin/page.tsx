@@ -1386,24 +1386,11 @@ export default function SuperAdminPage() {
     try {
       setLoadingLoginActivities(true);
 
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-
-      const accessToken = session?.access_token;
-
-      if (!accessToken) {
-        throw new Error("Authentication session not found.");
-      }
-
       const response = await fetch(
         "/api/auth/login-activity?limit=500",
         {
           method: "GET",
           cache: "no-store",
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
         }
       );
 

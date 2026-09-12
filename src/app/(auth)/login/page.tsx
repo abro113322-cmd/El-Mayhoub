@@ -70,24 +70,14 @@ export default function LoginPage() {
       return;
     }
 
-    // Capture the authenticated session token and let the server
-    // record the request IP and Vercel geolocation headers.
-    if (data.session.access_token) {
-      try {
-        await fetch("/api/auth/login-activity", {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${data.session.access_token}`,
-          },
-          cache: "no-store",
-        });
-      } catch (logError) {
-        // Login should still succeed even if activity logging fails.
-        console.error(
-          "Login activity logging failed:",
-          logError
-        );
-      }
+    try {
+      await fetch("/api/auth/login-activity", {
+        method: "POST",
+        cache: "no-store",
+      });
+    } catch (logError) {
+      // Login should still succeed even if activity logging fails.
+      console.error("Login activity logging failed:", logError);
     }
 
     setLoading(false);

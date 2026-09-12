@@ -1,29 +1,15 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { requireFinancialSameOrigin } from "@/lib/financial-security";
 
-async function getAuthenticatedUserFromRequest(request: Request) {
-  const authorization = request.headers.get("authorization");
+const privateHeaders = {
+  "Cache-Control": "private, no-store",
+};
 
-  if (!authorization?.toLowerCase().startsWith("bearer ")) {
-    return null;
-  }
-
-  const token = authorization.slice(7).trim();
-
-  if (!token) {
-    return null;
-  }
-
-  const {
-    data: { user },
-    error,
-  } = await supabaseAdmin.auth.getUser(token);
-
-  if (error || !user) {
-    return null;
-  }
-
-  return user;
+function withPrivateHeaders(response: Response) {
+  response.headers.set("Cache-Control", privateHeaders["Cache-Control"]);
+  return response;
 }
 
 function decodeHeaderValue(value: string | null) {
@@ -70,12 +56,19 @@ function getTrustedVercelHeader(
 
 export async function POST(request: Request) {
   try {
-    const user = await getAuthenticatedUserFromRequest(request);
+    const originError = requireFinancialSameOrigin(request);
+    if (originError) return withPrivateHeaders(originError);
 
-    if (!user) {
+    const supabase = await createSupabaseServerClient();
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    if (authError || !user) {
       return NextResponse.json(
         { error: "Unauthorized" },
-        { status: 401 }
+        { status: 401, headers: privateHeaders }
       );
     }
 
@@ -162,43 +155,33 @@ export async function POST(request: Request) {
 
       return NextResponse.json(
         { error: "Failed to record login activity" },
-        { status: 500 }
+        { status: 500, headers: privateHeaders }
       );
     }
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true }, { headers: privateHeaders });
   } catch (error) {
     console.error("Login activity POST error:", error);
 
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500, headers: privateHeaders }
     );
   }
 }
 
 export async function GET(request: Request) {
   try {
-    const authorization = request.headers.get("authorization");
-
-    if (!authorization?.toLowerCase().startsWith("bearer ")) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
-    }
-
-    const token = authorization.slice(7).trim();
-
+    const supabase = await createSupabaseServerClient();
     const {
       data: { user },
       error: authError,
-    } = await supabaseAdmin.auth.getUser(token);
+    } = await supabase.auth.getUser();
 
     if (authError || !user) {
       return NextResponse.json(
         { error: "Unauthorized" },
-        { status: 401 }
+        { status: 401, headers: privateHeaders }
       );
     }
 
@@ -217,14 +200,14 @@ export async function GET(request: Request) {
 
       return NextResponse.json(
         { error: "Profile check failed" },
-        { status: 500 }
+        { status: 500, headers: privateHeaders }
       );
     }
 
     if (profile?.role !== "super_admin") {
       return NextResponse.json(
         { error: "Forbidden" },
-        { status: 403 }
+        { status: 403, headers: privateHeaders }
       );
     }
 
@@ -254,19 +237,19 @@ export async function GET(request: Request) {
 
       return NextResponse.json(
         { error: "Failed to load login activity" },
-        { status: 500 }
+        { status: 500, headers: privateHeaders }
       );
     }
 
     return NextResponse.json({
       activities: activities ?? [],
-    });
+    }, { headers: privateHeaders });
   } catch (error) {
     console.error("Login activity GET error:", error);
 
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500, headers: privateHeaders }
     );
   }
 }
