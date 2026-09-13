@@ -42,7 +42,8 @@ export async function checkRateLimit(
 
   const bucket = Math.floor(Date.now() / 1000 / options.windowSeconds);
   const key = `el-mayhoub:rate:${options.key}:${bucket}`;
-  const response = await fetch(endpoint!, {
+  const pipelineEndpoint = `${endpoint!.replace(/\/$/, "")}/pipeline`;
+  const response = await fetch(pipelineEndpoint, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${token}`,
