@@ -54,7 +54,7 @@ export async function getExpensesByCategory(
 ) {
   const { data, error } = await supabase
     .from("transactions")
-    .select("category_id, amount, categories(name)")
+    .select("category_id, amount, categories!transactions_category_id_fkey(name)")
     .eq("user_id", userId)
     .eq("type", "expense");
 
