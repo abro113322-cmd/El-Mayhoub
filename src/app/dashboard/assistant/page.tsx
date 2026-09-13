@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
-import { supabase } from "@/lib/supabase";
 
 type Language = "en" | "ar";
 
@@ -11,7 +10,6 @@ export default function AssistantPage() {
   const [reply, setReply] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const [userId, setUserId] = useState("");
   const [language, setLanguage] = useState<Language>("en");
 
   const isArabic = language === "ar";
@@ -47,31 +45,8 @@ export default function AssistantPage() {
     };
   }, []);
 
-  useEffect(() => {
-    async function loadUser() {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
-      if (user) {
-        setUserId(user.id);
-      }
-    }
-
-    loadUser();
-  }, []);
-
   async function sendMessage() {
     if (!message.trim()) return;
-
-    if (!userId) {
-      setReply(
-        isArabic
-          ? "يرجى الانتظار، جاري تحميل المستخدم..."
-          : "Please wait, loading user..."
-      );
-      return;
-    }
 
     setLoading(true);
     setReply("");
@@ -84,7 +59,6 @@ export default function AssistantPage() {
         },
         body: JSON.stringify({
           message,
-          userId,
         }),
       });
 
@@ -160,7 +134,7 @@ Who invented the computer?`
           <button
             type="button"
             onClick={sendMessage}
-            disabled={loading || !userId}
+            disabled={loading}
             className="mt-4 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 px-6 py-3 rounded-xl"
           >
             {loading
