@@ -8,7 +8,7 @@ export default function DashboardPreview() {
         </h2>
 
         <p className="text-slate-400 text-center text-xl mb-20">
-          Monitor your money in real time with AI-powered insights.
+          Monitor your money in real time.
         </p>
 
         <div className="bg-slate-950 rounded-3xl border border-slate-800 p-10 shadow-2xl">
@@ -79,37 +79,14 @@ export default function DashboardPreview() {
 
           </div>
 
-          <div className="grid lg:grid-cols-3 gap-8 mt-10">
+          <div className="mt-10">
 
-            <div className="lg:col-span-2">
+            <div className="bg-slate-800 rounded-2xl h-80 flex items-center justify-center text-3xl font-bold text-slate-300">
 
-              <div className="bg-slate-800 rounded-2xl h-80 flex items-center justify-center text-3xl font-bold text-slate-300">
-
-                📈 Financial Analytics
-
-              </div>
+              📈 Financial Analytics
 
             </div>
 
-            <div className="bg-slate-800 rounded-2xl p-8">
-
-              <h3 className="text-2xl font-bold text-white mb-6">
-                AI Insight
-              </h3>
-
-              <p className="text-slate-400 leading-8">
-
-                Your spending on food increased by
-                18% this month.
-
-                <br /><br />
-
-                AI recommends reducing restaurant
-                expenses to stay within your budget.
-
-              </p>
-
-            </div>
 
           </div>
 

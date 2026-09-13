@@ -5,7 +5,7 @@ export default function Hero() {
     <section className="min-h-screen flex flex-col justify-center items-center bg-[#020617] text-center px-6">
 
       <span className="text-blue-400 font-semibold tracking-widest uppercase mb-5">
-        AI Powered Finance
+        Personal Finance
       </span>
 
       <h1 className="text-7xl font-extrabold text-white leading-tight">
@@ -14,8 +14,7 @@ export default function Hero() {
 
       <p className="text-slate-400 text-2xl mt-8 max-w-3xl leading-10">
         Manage your income, expenses, savings,
-        investments and financial goals with the power
-        of Artificial Intelligence.
+        investments and financial goals in one secure place.
       </p>
 
       <div className="flex gap-6 mt-12">

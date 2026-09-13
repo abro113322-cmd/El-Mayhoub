@@ -1,12 +1,6 @@
 export default function Features() {
   const features = [
     {
-      icon: "🤖",
-      title: "AI Assistant",
-      description:
-        "Analyze your spending habits and receive smart financial recommendations.",
-    },
-    {
       icon: "💳",
       title: "Expense Tracking",
       description:
@@ -29,7 +23,7 @@ export default function Features() {
           Powerful Features
         </h2>
 
-        <div className="grid md:grid-cols-3 gap-8">
+        <div className="grid md:grid-cols-2 gap-8">
 
           {features.map((feature) => (
             <div

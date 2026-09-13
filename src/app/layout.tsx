@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import UpdateAvailable from "@/components/UpdateAvailable";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -22,12 +23,18 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const loadedVersion =
+    process.env.VERCEL_GIT_COMMIT_SHA ?? "development";
+
   return (
     <html
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        {children}
+        <UpdateAvailable loadedVersion={loadedVersion} />
+      </body>
     </html>
   );
 }

@@ -30,10 +30,6 @@ const menu = [
     href: "/dashboard/savings",
   },
   {
-    key: "AI Assistant",
-    href: "/dashboard/assistant",
-  },
-  {
     key: "Reports",
     href: "/dashboard/reports",
   },
@@ -51,7 +47,6 @@ const translations: Record<
   Transactions: "المعاملات",
   Budgets: "الميزانيات",
   Savings: "المدخرات",
-  "AI Assistant": "المساعد الذكي",
   Reports: "التقارير",
   Settings: "الإعدادات",
 };
